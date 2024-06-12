@@ -32,6 +32,7 @@ async function run() {
     const teachersRequestCollection = database.collection("requests");
     const paymentsCollection = database.collection("payments");
     const assignmentsDataCollection = database.collection("assignment");
+    const feedbackCollection = database.collection("feedback")
 
     // verify admin
     const verifyAdmin = async (req, res, next) => {
@@ -258,14 +259,18 @@ async function run() {
       res.send(result);
     });
 
+
+
     //data assignment from enrollment page
     app.get("/assignment-data/:id", async (req, res) => {
       const id = req.params.id;
       console.log(id);
       const query = { SeeDetailsId: id };
-      const result = await assignmentsDataCollection.findOne(query);
+      const result = await assignmentsDataCollection.find(query).toArray();
       res.send(result);
     });
+
+    
 
     //enroll data get for enroll page
     app.get("/my-enroll/:email",verifyToken,verifyStudent, async (req, res) => {
@@ -288,6 +293,108 @@ async function run() {
     app.post("/assignment", async (req, res) => {
       const classData = req.body;
       const result = await assignmentsDataCollection.insertOne(classData);
+      const id = classData?.SeeDetailsId
+      console.log(id)
+      const query = { SeeDetailsId: id };
+      const updateDoc = {
+        $inc: { assignmentPost: 1 },
+      };
+      const updatePayment = await assignmentsDataCollection.updateOne(query, updateDoc);
+      console.log(updatePayment);
+      res.send({ result, updatePayment });
+    });
+
+
+    //increment submit
+    app.post("/submit-info/:id", async(req, res) => {
+      // const classData = req.body;
+      // const id = classData?.SeeDetailsId
+      const id = req.params.id
+      const query = { SeeDetailsId: id };
+      const updateDoc = {
+        $inc: { assignmentSubmit: 1 },
+      };
+      const result = await assignmentsDataCollection.updateOne(query,updateDoc);
+      res.send(result);
+    });
+
+
+
+
+    //teacher class enroll assignment info
+    // app.get('/teacher-stats/:id' , async (req,res) => {
+    //   const id = req.params.id
+    //   const query = { SeeDetailsId: id };
+    //   const totalAssignment = await assignmentsDataCollection.estimatedDocumentCount(query)
+    //   const totalSubmit = await assignmentsDataCollection.estimatedDocumentCount(query)
+    //   res.send({
+    //     totalAssignment,
+    //     totalSubmit
+    //   })
+
+    // })
+
+
+    app.get('/teacher-stats/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { SeeDetailsId: id };
+    
+      try {
+        // Aggregate the sum of assignmentSubmit and assignmentPost for the given SeeDetailsId
+        const aggregationResult = await assignmentsDataCollection.aggregate([
+          { $match: query },
+          {
+            $group: {
+              _id: null,
+              totalAssignmentSubmit: { $sum: "$assignmentSubmit" },
+              totalAssignmentPost: { $sum: "$assignmentPost" }
+            }
+          }
+        ]).toArray();
+    
+        if (aggregationResult.length > 0) {
+          const { totalAssignmentSubmit, totalAssignmentPost } = aggregationResult[0];
+          res.send({
+            totalAssignmentSubmit,
+            totalAssignmentPost
+          });
+        } else {
+          res.send({
+            totalAssignmentSubmit: 0,
+            totalAssignmentPost: 0
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching teacher stats:', error);
+        res.status(500).send({ error: 'Internal Server Error' });
+      }
+    });
+
+
+
+    //total enrolment
+    // app.get('/total-enrolment/:id' , async (req,res) =>{
+    //   const id = req.params.id;
+    //   const query = { classId: id };
+    //   const totalEnrolment = await paymentsCollection.estimatedDocumentCount(query)
+    //   res.send(totalEnrolment)
+    // })
+
+
+    app.get('/total-enrolment/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { classId: id };
+    
+      const totalEnrolment = await paymentsCollection.countDocuments(query);
+      res.send({ totalEnrolment });
+    });
+    
+
+
+    //feedBack section 
+    app.post("/feedback", async (req, res) => {
+      const classData = req.body;
+      const result = await feedbackCollection.insertOne(classData);
       res.send(result);
     });
 
