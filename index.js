@@ -320,6 +320,25 @@ async function run() {
 
 
 
+    //
+    app.patch("/change-admin/:id", async(req, res) => {
+      // const classData = req.body;
+      // const id = classData?.SeeDetailsId
+      const id = req.params.id
+      const query = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: { 
+          role : 'admin',
+          status : 'pending'
+
+         },
+      };
+      const result = await usersCollection.updateOne(query,updateDoc);
+      res.send(result);
+    });
+
+
+
 
     //teacher class enroll assignment info
     // app.get('/teacher-stats/:id' , async (req,res) => {
@@ -391,12 +410,21 @@ async function run() {
     
 
 
-    //feedBack section 
-    app.post("/feedback", async (req, res) => {
+    //Post feedBack data 
+    app.post('/feedback' , async (req,res) =>{
       const classData = req.body;
       const result = await feedbackCollection.insertOne(classData);
-      res.send(result);
-    });
+      res.send(result)
+    })
+
+
+    //get feedback data 
+    app.get('/feedback-data' , async (req,res) =>{
+      const result = await feedbackCollection.find().toArray()
+      res.send(result)
+    })
+
+
 
     //payment collection
     app.post("/payment", async (req, res) => {
@@ -486,6 +514,32 @@ async function run() {
       const result = await teachersRequestCollection.find().toArray();
       res.send(result);
     });
+
+
+
+    //
+    app.get('/get-feedback/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { trbId: id };
+    
+      const feedbackCount = await feedbackCollection.find(query).toArray();
+      res.send(feedbackCount);
+    });
+
+
+
+    //get for home total
+    app.get('/home-stats', async(req,res) =>{
+      const user = await usersCollection.estimatedDocumentCount()
+      const classes = await classesCollection.estimatedDocumentCount()
+      const enroll = await paymentsCollection.estimatedDocumentCount()
+
+      res.send({
+        user,
+        classes,
+        enroll
+      })
+    })
 
     // Send a ping to confirm a successful connection
     // await client.db("admin").command({ ping: 1 });
