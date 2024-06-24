@@ -153,7 +153,7 @@ async function run() {
     //payment server
     app.post("/create-payment-intent", async (req, res) => {
       const price = req.body.price;
-      
+
       const priceInCent = parseInt(price) * 100;
 
       if (!price || priceInCent < 1) return;
@@ -210,6 +210,8 @@ async function run() {
       const result2 = await usersCollection.updateOne(query, updateDoc);
       res.send({ result, result2 });
     });
+
+    
 
     //user-all-admin status change
     app.patch("/user-all-admin/update/:id", async (req, res) => {
