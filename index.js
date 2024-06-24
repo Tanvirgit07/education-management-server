@@ -138,7 +138,7 @@ async function run() {
       if (isExist) return res.send(isExist);
 
       const option = { upsert: true };
-      
+
       const query = { email: user?.email };
       const updateDoc = {
         $set: {
@@ -153,6 +153,7 @@ async function run() {
     //payment server
     app.post("/create-payment-intent", async (req, res) => {
       const price = req.body.price;
+      
       const priceInCent = parseInt(price) * 100;
 
       if (!price || priceInCent < 1) return;
