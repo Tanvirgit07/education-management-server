@@ -264,7 +264,7 @@ async function run() {
       res.send(result);
     });
 
-    
+
 
     //get for all classes route
     app.get("/all-classes", async (req, res) => {
@@ -279,6 +279,8 @@ async function run() {
       const result = await classesCollection.findOne(query);
       res.send(result);
     });
+
+    
 
     //single data get from see details
     app.get("/single-data/:id", async (req, res) => {
