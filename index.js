@@ -211,7 +211,7 @@ async function run() {
       res.send({ result, result2 });
     });
 
-    
+
 
     //user-all-admin status change
     app.patch("/user-all-admin/update/:id", async (req, res) => {
@@ -246,6 +246,8 @@ async function run() {
       const result = await classesCollection.updateOne(query, updateDoc);
       res.send(result);
     });
+
+    
 
     //get a user info by email
     app.get("/user/:email", async (req, res) => {
