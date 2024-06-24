@@ -13,6 +13,7 @@ app.use(express.json());
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.j10pchd.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
+
 const client = new MongoClient(uri, {
   serverApi: {
     version: ServerApiVersion.v1,
@@ -209,6 +210,23 @@ async function run() {
 
     //user-all-admin status change
     app.patch("/user-all-admin/update/:id", async (req, res) => {
+      const id = req.params.id;
+      const user = req.body;
+      const query = { _id: new ObjectId(id) };
+      console.log(query);
+      console.log(user);
+      const updateDoc = {
+        $set: {
+          ...user,
+        },
+      };
+      console.log(updateDoc);
+      const result = await classesCollection.updateOne(query, updateDoc);
+      res.send(result);
+    });
+
+
+    app.patch("/user-all-admin/reject/:id", async (req, res) => {
       const id = req.params.id;
       const user = req.body;
       const query = { _id: new ObjectId(id) };
