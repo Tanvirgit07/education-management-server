@@ -25,7 +25,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    
+
     // await client.connect();
 
     const database = client.db("eduManage");
@@ -138,6 +138,7 @@ async function run() {
       if (isExist) return res.send(isExist);
 
       const option = { upsert: true };
+      
       const query = { email: user?.email };
       const updateDoc = {
         $set: {
