@@ -256,13 +256,15 @@ async function run() {
       res.send(result);
     });
 
-    
+
 
     //get all users from db
     app.get("/users", verifyToken,verifyAdmin, async (req, res) => {
       const result = await usersCollection.find().toArray();
       res.send(result);
     });
+
+    
 
     //get for all classes route
     app.get("/all-classes", async (req, res) => {
